@@ -1,0 +1,231 @@
+@import "tailwindcss";
+
+/* Class-based dark mode — toggled on <html> by the theme switch. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  scroll-behavior: smooth;
+}
+html.dark {
+  color-scheme: dark;
+}
+html:not(.dark) {
+  color-scheme: light;
+}
+
+::selection {
+  background: rgb(236 72 153 / 0.35);
+}
+
+/* Slim scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(113 113 122 / 0.35);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(113 113 122 / 0.55);
+}
+
+/* ── Sidebar (category tree) ─────────────────────────────────────────────── */
+.sb-item {
+  transition: background-color 0.15s ease;
+}
+.sb-item.is-active {
+  background: color-mix(in oklab, #ec4899 14%, transparent);
+}
+.sb-item.is-active .sb-label {
+  color: #db2777;
+  font-weight: 600;
+}
+html.dark .sb-item.is-active {
+  background: color-mix(in oklab, #ec4899 20%, transparent);
+}
+html.dark .sb-item.is-active .sb-label {
+  color: #f9a8d4;
+}
+
+.chev {
+  transition: transform 0.15s ease;
+}
+.chev.open {
+  transform: rotate(90deg);
+}
+
+/* Accordion collapse — grid-rows trick for smooth height animation */
+.sb-children {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.18s ease;
+}
+.sb-children > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.sb-group.sb-open .sb-children {
+  grid-template-rows: 1fr;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.pag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: white;
+  color: #374151;
+  border: 1px solid rgb(0 0 0 / 0.1);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.pag:hover:not(:disabled):not(.is-active) {
+  background: #f4f4f5;
+}
+.pag:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pag.is-active {
+  background: #db2777;
+  border-color: #db2777;
+  color: #fff;
+}
+html.dark .pag {
+  background: #18181b;
+  color: #d4d4d8;
+  border-color: rgb(255 255 255 / 0.1);
+}
+html.dark .pag:hover:not(:disabled):not(.is-active) {
+  background: #27272a;
+}
+
+/* Active-filter chips (client-rendered on the catalog canvas) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: color-mix(in oklab, #ec4899 12%, transparent);
+  color: #db2777;
+  border: 1px solid color-mix(in oklab, #ec4899 35%, transparent);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+html.dark .chip {
+  color: #f9a8d4;
+}
+.chip:hover {
+  background: color-mix(in oklab, #ec4899 22%, transparent);
+}
+.chip .x {
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+/* ── Admin panel primitives (admin UI is always dark) ────────────────────── */
+.card {
+  border-radius: 1rem;
+  background: rgb(24 24 27 / 0.7);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  padding: 1.25rem;
+}
+.field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.04);
+  padding: 0.55rem 0.8rem;
+  font-size: 0.875rem;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field::placeholder {
+  color: #71717a;
+}
+.field:focus {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgb(236 72 153 / 0.25);
+}
+.field:disabled {
+  opacity: 0.5;
+}
+label.f-label {
+  display: block;
+  margin-bottom: 1rem;
+}
+label.f-label > span {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a1a1aa;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.55rem 1.1rem;
+  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: transparent;
+  color: #d4d4d8;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.btn-ghost:hover {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.2);
+}
+pre.json-out {
+  border-radius: 0.75rem;
+  background: #09090b;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  padding: 1rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #7dd3fc;
+  overflow: auto;
+  max-height: 26rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

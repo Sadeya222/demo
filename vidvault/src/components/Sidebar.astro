@@ -1,0 +1,100 @@
+---
+import type { CatNode } from '../lib/taxonomy';
+
+interface Props {
+  taxonomy: CatNode[];
+  total: number;
+}
+
+const { taxonomy, total } = Astro.props;
+
+const countCls =
+  'ml-auto rounded-full bg-black/5 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-500 dark:bg-white/10 dark:text-zinc-400';
+const itemCls =
+  'sb-item flex items-center rounded-lg px-2.5 py-2 text-sm text-zinc-600 hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/5';
+---
+
+<aside
+  id="sidebar"
+  aria-label="Category navigation"
+  class="fixed bottom-0 left-0 top-16 z-40 w-64 -translate-x-full overflow-y-auto border-r border-black/5 bg-white transition-transform duration-200 dark:border-white/10 dark:bg-zinc-950 lg:translate-x-0"
+>
+  <div class="p-3">
+    <p class="px-2.5 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+      Browse
+    </p>
+
+    <a href="/" data-filter data-cat="" data-sub="" class={`${itemCls} w-full`}>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="mr-2 h-4 w-4 shrink-0 text-pink-500"
+        aria-hidden="true"
+      >
+        <rect x="2" y="4" width="20" height="16" rx="3" />
+        <path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none" />
+      </svg>
+      <span class="sb-label">All Videos</span>
+      <span class={countCls}>{total}</span>
+    </a>
+
+    <div class="mt-1 space-y-0.5">
+      {taxonomy.map((cat) => (
+        <div data-group={cat.name} class="sb-group">
+          <div class="flex items-center">
+            <a
+              href={`/?cat=${encodeURIComponent(cat.name)}`}
+              data-filter
+              data-cat={cat.name}
+              data-sub=""
+              class={`${itemCls} flex-1`}
+            >
+              <span class="sb-label truncate">{cat.name}</span>
+              <span class={countCls}>{cat.count}</span>
+            </a>
+            <button
+              data-toggle={cat.name}
+              type="button"
+              class="-mr-1 rounded-md p-1.5 text-zinc-400 hover:bg-black/5 dark:hover:bg-white/10"
+              aria-expanded="false"
+              aria-label={`Toggle ${cat.name} subcategories`}
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" class="chev h-3.5 w-3.5" aria-hidden="true">
+                <path
+                  d="M7.29 4.7a.9.9 0 0 1 1.41-.02l5.3 5.3a.9.9 0 0 1 0 1.28l-5.3 5.3a.9.9 0 0 1-1.43-1.26l4.66-4.66-4.66-4.66a.9.9 0 0 1 .02-1.28Z"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <div class="sb-children" data-children={cat.name}>
+            <div>
+              <div class="space-y-0.5 py-0.5 pl-9">
+                {cat.subs.map((sub) => (
+                  <a
+                    href={`/?cat=${encodeURIComponent(cat.name)}&sub=${encodeURIComponent(sub.name)}`}
+                    data-filter
+                    data-cat={cat.name}
+                    data-sub={sub.name}
+                    class={`${itemCls} pl-5 text-[13px]`}
+                  >
+                    <span class="sb-label truncate">{sub.name}</span>
+                    <span class={countCls}>{sub.count}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+</aside>
+
+<!-- Mobile drawer backdrop -->
+<div id="sidebar-backdrop" class="fixed inset-0 top-16 z-30 hidden bg-black/50 backdrop-blur-sm lg:hidden"></div>
