@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="lipGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f775ac"/>
+      <stop offset="0.55" stop-color="#ec4899"/>
+      <stop offset="1" stop-color="#be185d"/>
+    </linearGradient>
+    <linearGradient id="lowerGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e5438c"/>
+      <stop offset="0.5" stop-color="#ec4899"/>
+      <stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+    <linearGradient id="tongueGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f9a8d4"/>
+      <stop offset="0.6" stop-color="#f472b6"/>
+      <stop offset="1" stop-color="#db2777"/>
+    </linearGradient>
+  </defs>
+
+  <!-- upper lip -->
+  <path fill="url(#lipGrad)" stroke="#9d174d" stroke-width="1" stroke-linejoin="round" d="
+    M11,33
+    C13,27.5 16.5,23.5 21.5,22.5
+    C24,22 26,23 27.5,24.8
+    C28.8,26.3 30,27.2 32,27.2
+    C34,27.2 35.2,26.3 36.5,24.8
+    C38,23 40,22 42.5,22.5
+    C47.5,23.5 51,27.5 53,33
+    C46.5,31 39.5,30 32,30
+    C24.5,30 17.5,31 11,33 Z"/>
+
+  <!-- lower lip -->
+  <path fill="url(#lowerGrad)" stroke="#9d174d" stroke-width="1" stroke-linejoin="round" d="
+    M11,33
+    C17.5,35.5 24.5,36.5 32,36.5
+    C39.5,36.5 46.5,35.5 53,33
+    C51,43.5 44.5,50.5 32,50.5
+    C19.5,50.5 13,43.5 11,33 Z"/>
+
+  <!-- mouth opening -->
+  <path fill="#500724" d="
+    M11,33
+    C17.5,31 24.5,30 32,30
+    C39.5,30 46.5,31 53,33
+    C46.5,34.8 39.5,35.6 32,35.6
+    C24.5,35.6 17.5,34.8 11,33 Z"/>
+
+  <!-- tongue, draped over the lower lip -->
+  <path fill="url(#tongueGrad)" stroke="#9d174d" stroke-width="1" stroke-linejoin="round" d="
+    M25,34.5
+    C28,32.8 36,32.8 39,34.5
+    C42.5,36.8 43.8,41.5 42.2,46.5
+    C40.6,51.5 36.5,55 32,55
+    C27.5,55 23.4,51.5 21.8,46.5
+    C20.2,41.5 21.5,36.8 25,34.5 Z"/>
+  <path fill="none" stroke="#9d174d" stroke-opacity="0.3" stroke-width="1" stroke-linecap="round" d="M32,36.5 C32.6,40.5 32.6,47 32,51"/>
+
+  <!-- glossy highlights -->
+  <ellipse cx="21.5" cy="27" rx="5.2" ry="2.2" transform="rotate(-12 21.5 27)" fill="#ffffff" opacity="0.4"/>
+  <circle cx="42.5" cy="26.8" r="1.6" fill="#ffffff" opacity="0.35"/>
+  <ellipse cx="18.5" cy="40.5" rx="3.8" ry="2" transform="rotate(24 18.5 40.5)" fill="#ffffff" opacity="0.3"/>
+  <ellipse cx="44" cy="39.5" rx="3.2" ry="1.7" transform="rotate(-24 44 39.5)" fill="#ffffff" opacity="0.25"/>
+  <ellipse cx="27.5" cy="40" rx="4.2" ry="2" transform="rotate(-16 27.5 40)" fill="#ffffff" opacity="0.35"/>
+  <ellipse cx="28.5" cy="48" rx="2.8" ry="1.4" transform="rotate(-8 28.5 48)" fill="#ffffff" opacity="0.25"/>
+</svg>

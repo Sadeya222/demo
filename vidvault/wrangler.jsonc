@@ -1,0 +1,9 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Project name = your *.pages.dev subdomain (renamable in the dashboard).
+  "name": "desidude",
+  // Keep at or below today's date.
+  "compatibility_date": "2026-09-01",
+  // `wrangler pages deploy` ships this directory.
+  "pages_build_output_dir": "dist"
+}

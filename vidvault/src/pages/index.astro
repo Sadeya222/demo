@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import MainLayout from '../layouts/MainLayout.astro';
+import CatalogCanvas from '../components/CatalogCanvas.astro';
+
+// Static route ("/") — in Astro 7, fixed-pathname routes bypass
+// getStaticPaths entirely, so data is resolved in the frontmatter.
+const videos = (await getCollection('videos')).sort(
+  (a, b) => +b.data.publishedAt - +a.data.publishedAt
+);
+const page = 1;
+---
+
+<MainLayout
+  videos={videos}
+  title="Video Catalog"
+  description="Stream a curated catalog of tech, design, gaming and lifestyle videos. Zero-database: every video is a JSON file in a Git repo, cataloged, searched and indexed automatically."
+>
+  <CatalogCanvas videos={videos} page={page} />
+</MainLayout>
