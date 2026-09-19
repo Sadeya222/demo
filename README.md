@@ -166,78 +166,137 @@ tag, recency tiebreak → 4-card grid).
 
 ## Project structure
 
+The Astro app lives at the **repository root** (this is what Cloudflare builds).
+
 ```
-src/
-├── config/site.mjs            # SITE_URL, brand, PER_PAGE, demo seed URLs
-├── content.config.ts          # Content Collection + Zod schema (the "DB schema")
-├── content/videos/*.json      # ← the database (10 demo entries)
-├── lib/
-│   ├── dates.ts               # ISO 8601 duration ↔ badge, relative dates
-│   ├── taxonomy.ts            # category tree builder (sidebar/admin)
-│   └── related.ts             # related-videos scoring engine
-├── layouts/MainLayout.astro   # shell: head meta/JSON-LD, header, sidebar, footer
-├── components/
-│   ├── Header.astro           # fixed header: logo · search · nav · theme toggle
-│   ├── Sidebar.astro          # fixed category tree (+ mobile drawer)
-│   ├── CatalogCanvas.astro    # grid + client search/filter/pagination engine
-│   ├── VideoCard.astro        # card (server) — mirrored by the client renderer
-│   └── VideoPlayer.astro      # 16:9 click-to-load iframe facade
-└── pages/
-    ├── index.astro            # /          (catalog page 1)
-    ├── index/page/[page].astro# /page/2/…  (static pagination routes)
-    ├── video/[id].astro       # /video/<id> (player + JSON-LD + related)
-    ├── sitemap.xml.ts         # dynamic sitemap endpoint
-    ├── robots.txt.ts          # dynamic robots endpoint
-    ├── admin/index.astro      # /admin — Git-based catalog manager
-    └── 404.astro
+.
+├── astro.config.mjs           # static output · Tailwind v4 vite plugin
+├── wrangler.jsonc             # Cloudflare config (Workers static assets, serves dist/)
+├── .node-version              # 22 — picked up by Cloudflare's build image & nvm
+├── public/
+│   ├── _headers               # security + cache headers (Pages & Workers)
+│   └── logo.svg
+└── src/
+    ├── config/site.mjs        # SITE_URL, brand, PER_PAGE, demo seed URLs
+    ├── content.config.ts      # Content Collection + Zod schema (the "DB schema")
+    ├── content/videos/*.json  # ← the database (10 demo entries)
+    ├── lib/
+    │   ├── dates.ts           # ISO 8601 duration ↔ badge, relative dates
+    │   ├── taxonomy.ts        # category tree builder (sidebar/admin)
+    │   └── related.ts         # related-videos scoring engine
+    ├── layouts/MainLayout.astro   # shell: head meta/JSON-LD, header, sidebar, footer
+    ├── components/
+    │   ├── Header.astro       # fixed header: ☰ · logo · search · live chat · theme
+    │   ├── Sidebar.astro      # category tree — fixed rail (lg+) / drawer (< lg)
+    │   ├── CatalogCanvas.astro# grid + client search/filter/pagination engine
+    │   ├── VideoCard.astro    # card (server) — mirrored by the client renderer
+    │   └── VideoPlayer.astro  # 16:9 iframe embed
+    └── pages/
+        ├── index.astro        # /          (catalog page 1)
+        ├── page/[page].astro  # /page/2/…  (static pagination routes)
+        ├── video/[id].astro   # /video/<id> (player + JSON-LD + related)
+        ├── sitemap.xml.ts     # dynamic sitemap endpoint
+        ├── robots.txt.ts      # dynamic robots endpoint
+        ├── admin/index.astro  # /admin — Git-based catalog manager
+        └── 404.astro
 ```
 
-## Deployment — Cloudflare Pages (ready)
+### Responsive shell
 
-The project is wired for **Cloudflare Pages** out of the box:
+| Breakpoint        | Header                                                     | Sidebar                                        |
+| ----------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| `< 640px` (phone) | ☰ · logo · 🔍 (tap → full-width search bar) · chat · theme | off-canvas drawer (☰ opens · ✕ / backdrop / Esc close, page scroll locked) |
+| `640–1023px`      | ☰ · logo · inline search · chat · theme                    | off-canvas drawer                              |
+| `≥ 1024px`        | logo + wordmark · inline search · "Live chat" · theme      | fixed 16rem rail; content and footer are offset by `lg:pl-64` |
 
-| Setting                | Value                                          |
-| ---------------------- | ---------------------------------------------- |
-| Build command          | `npm run build`                                |
-| Build output directory | `dist`                                         |
-| Node version           | **22** (Astro 7.3.2 refuses Node 20 — set it)  |
-| Root directory         | (repo root)                                    |
+The drawer/accordion logic lives in `Sidebar.astro`, so it works on every page
+(catalog, video detail, 404). Other scripts talk to it via one DOM event:
+`document.dispatchEvent(new CustomEvent('vv:sidebar', { detail: { open: false } }))`
+or `{ detail: { group: 'Tech' } }` to expand a category.
 
-### Option A — Git integration (recommended)
+## Deployment — Cloudflare (Pages **or** Workers)
 
-1. Push this folder to a GitHub repo.
-2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
-3. Build settings: command `npm run build`, output directory `dist`.
-4. Add one environment variable: `NODE_VERSION = 22`
-   (Build & Deployment → Environment variables).
-5. Deploy. Every `git push` now rebuilds automatically (branches/PRs get
-   free preview deployments), and `SITE_URL` auto-resolves to the deployed
-   origin — the sitemap, robots.txt and every VideoObject schema URL use the
-   **real live domain on every build**, no code changes needed.
+The site is 100 % static: `npm run build` writes plain HTML/CSS/JS to `dist/`
+and Cloudflare serves that folder from the edge. Both Cloudflare products are
+supported out of the box; pick whichever you created in the dashboard.
 
-Custom domain: attach it under the project's **Custom domains** tab, then
-optionally pin the exact domain by adding an env var `SITE_URL = https://yourdomain.com`
-(the build env `URL` always reports the `*.pages.dev` origin).
+> **Golden rule:** Cloudflare must build from the **repository root** (where
+> `package.json`, `astro.config.mjs` and `wrangler.jsonc` are) and publish
+> the **`dist`** folder. If the *Root directory* setting points anywhere else,
+> the build produces no `dist/` and Cloudflare reports that it can't find any
+> HTML/JS to deploy.
 
-### Option B — Wrangler CLI
+### Option A — Cloudflare Pages · Git integration
+
+Dashboard → **Workers & Pages → Create → Pages → Connect to Git** → pick
+`Sadeya222/demo`.
+
+| Setting                       | Value           |
+| ----------------------------- | --------------- |
+| Framework preset              | Astro           |
+| Build command                 | `npm run build` |
+| Build output directory        | `dist`          |
+| Root directory (advanced)     | *(leave empty)* |
+| Env var `NODE_VERSION`        | `22` *(optional — `.node-version` already pins it)* |
+| Env var `SITE_URL`            | `https://<project>.pages.dev` or your custom domain (see [Configuration](#configuration)) |
+
+Every `git push` rebuilds the site; branches/PRs get preview deployments.
+
+### Option B — Cloudflare Workers · Git integration (Workers Builds)
+
+Dashboard → **Workers & Pages → Create → Workers → Import a repository** →
+pick `Sadeya222/demo`.
+
+| Setting          | Value                     |
+| ---------------- | ------------------------- |
+| Build command    | `npm run build`           |
+| Deploy command   | `npx wrangler deploy`     |
+| Root directory   | *(leave empty)*           |
+| Env var `SITE_URL` | `https://desidude.<you>.workers.dev` or your custom domain |
+
+`wrangler.jsonc` tells Wrangler to upload `./dist` as static assets, serve
+`404.html` with a real 404 status and redirect `/video/x` → `/video/x/`.
+
+### Option C — Deploy from your machine (Wrangler CLI)
 
 ```bash
 npx wrangler login
-npm run deploy:cf        # builds, then: wrangler pages deploy dist --project-name=desidude
+npm run deploy          # Workers:  astro build → wrangler deploy
+npm run deploy:pages    # Pages:    astro build → wrangler pages deploy dist --project-name=desidude
 ```
 
-### What Cloudflare Pages handles automatically
+### Custom domain
 
-- `404.html` → served for unknown routes
-- `_headers` (in `public/`) → security headers + smart cache policies
-  (fingerprinted `/_astro/*` assets cached forever, SEO files revalidated hourly)
-- Directory URLs: `/video/x` → 301 → `/video/x/` (index.html in a folder)
+Attach it under the project's **Custom domains** (Pages) or **Settings →
+Domains & Routes** (Workers), then set the build-time env var
+`SITE_URL=https://yourdomain.com` (or change `DEFAULT_SITE_URL` in
+`src/config/site.mjs`) so the sitemap, robots.txt, canonical and VideoObject
+URLs use the real domain.
+
+### What Cloudflare handles automatically
+
+- `404.html` → served (with a 404 status) for unknown routes
+- `public/_headers` → security headers + cache policy (fingerprinted `/_astro/*`
+  assets cached forever, SEO files revalidated hourly)
+- Directory URLs: `/video/x` → redirect → `/video/x/` (matches the canonical
+  URLs and sitemap entries generated at build time)
+
+### Troubleshooting
+
+| Symptom | Cause → fix |
+| ------- | ----------- |
+| *"No HTML/JS found"*, *"Output directory 'dist' not found"*, or a blank/404 site after a "successful" deploy | Cloudflare built from the wrong folder. Set **Root directory** to empty (repo root), build command `npm run build`, output `dist`. |
+| `Missing script: "build"` / `astro: not found` | Same as above — the build ran outside the project root. |
+| `Node.js v18/v20 is not supported by Astro` | Add env var `NODE_VERSION=22` (the repo's `.node-version` also requests 22). |
+| `wrangler deploy` says *"Workers-specific command in a Pages project"* | Old config. `wrangler.jsonc` now uses the Workers `assets` format — pull the latest commit. |
+| `wrangler pages deploy` warns *"missing pages_build_output_dir"* | Harmless: Pages ignores `wrangler.jsonc` and uses the `dist` folder passed on the CLI. |
+| Canonical / sitemap URLs show `desidude.pages.dev` on a custom domain | Set the `SITE_URL` env var (build-time) and redeploy. |
 
 ## Other deployment notes
 
 - **Static output** — `dist/` can also ship to Netlify, Vercel, S3, GitHub
-  Pages or any CDN; the `SITE_URL` env chain works anywhere (`SITE_URL` →
-  `URL` → default).
+  Pages or any CDN; set `SITE_URL` in the build environment (Netlify's own
+  `URL` variable is picked up automatically).
 - CI example (GitHub Actions): `npm ci && npm run build` on push — new JSON
   commits ship in the same pipeline.
 - If the catalog ever drops to ≤ 9 videos (single page), delete

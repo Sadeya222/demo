@@ -1,0 +1,273 @@
+---
+import { SITE_NAME } from '../config/site.mjs';
+---
+
+<!--
+  Fixed top bar — three responsive modes:
+    • lg+   : ☰ hidden · logo + wordmark · inline search · Live chat (label) · theme
+    • sm–lg : ☰ · logo · inline search · Live chat (icon) · theme
+    • < sm  : ☰ · logo · [search icon] · Live chat (icon) · theme
+              tapping the search icon turns the whole row into a search bar
+              (← closes it) so the input is never squeezed to 100 px.
+  The single #search-input is shared by every mode, so the catalog's
+  real-time filtering keeps working everywhere.
+-->
+<header
+  id="site-header"
+  class="fixed inset-x-0 top-0 z-50 border-b border-black/5 bg-white/85 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/85"
+>
+  <div class="flex h-16 items-center gap-1 px-2.5 sm:gap-3 sm:px-6">
+    <!-- Mobile/tablet: open the sidebar drawer -->
+    <button
+      id="menu-btn"
+      type="button"
+      class="hdr-collapsible shrink-0 rounded-lg p-2 text-zinc-600 hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/10 lg:hidden"
+      aria-label="Open category navigation"
+      aria-controls="sidebar"
+      aria-expanded="false"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+    </button>
+
+    <!-- Brand → root listing -->
+    <a href="/" class="hdr-collapsible flex shrink-0 items-center gap-2.5 pl-1 sm:pl-0" aria-label={`${SITE_NAME} home`}>
+      <img
+        src="/logo.svg"
+        alt={`${SITE_NAME} logo`}
+        width="36"
+        height="36"
+        class="h-9 w-9 drop-shadow-lg drop-shadow-pink-500/25"
+      />
+      <span class="hidden text-lg font-extrabold tracking-tight md:block">
+        DESI<span class="bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">DUDE</span>
+      </span>
+    </a>
+
+    <!-- Search: inline from sm up; on phones it's revealed by #search-open -->
+    <form
+      id="search-form"
+      action="/"
+      method="get"
+      role="search"
+      class="hdr-search mx-auto hidden w-full min-w-0 max-w-xl flex-1 items-center gap-1 sm:flex"
+    >
+      <button
+        id="search-close"
+        type="button"
+        class="shrink-0 rounded-lg p-2 text-zinc-600 hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden"
+        aria-label="Close search"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5" aria-hidden="true">
+          <path d="M19 12H5m7-7-7 7 7 7" />
+        </svg>
+      </button>
+      <div class="relative min-w-0 flex-1">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          id="search-input"
+          type="search"
+          name="q"
+          autocomplete="off"
+          enterkeyhint="search"
+          placeholder="Search videos…"
+          class="w-full rounded-full border-0 bg-black/5 py-2.5 pl-10 pr-4 text-sm ring-1 ring-black/10 transition placeholder:text-zinc-400 focus:bg-white focus:ring-2 focus:ring-pink-500 dark:bg-white/5 dark:ring-white/10 dark:focus:bg-zinc-900"
+          aria-label="Search videos"
+          title="Search titles, tags and categories — press / to focus"
+        />
+      </div>
+    </form>
+
+    <!-- Right: navigation controls -->
+    <nav class="hdr-collapsible ml-auto flex shrink-0 items-center gap-0.5 sm:ml-0 sm:gap-1.5" aria-label="Primary">
+      <button
+        id="search-open"
+        type="button"
+        class="rounded-lg p-2 text-zinc-600 hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/10 sm:hidden"
+        aria-label="Open search"
+        aria-controls="search-form"
+        aria-expanded="false"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-5 w-5" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      </button>
+      <button
+        id="live-chat-btn"
+        type="button"
+        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-pink-600 to-rose-500 p-2 text-sm font-semibold text-white shadow-lg shadow-pink-500/25 transition hover:brightness-110 active:translate-y-px sm:px-3.5 sm:py-2"
+        aria-label="Live chat"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 sm:h-4 sm:w-4" aria-hidden="true">
+          <path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.4-.8L3 21l1.9-5.6a8.38 8.38 0 0 1-.9-3.9 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5Z" />
+        </svg>
+        <span class="hidden md:inline">Live chat</span>
+      </button>
+      <button
+        id="theme-toggle"
+        type="button"
+        class="rounded-lg p-2 text-zinc-600 hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/10"
+        aria-label="Toggle color theme"
+        aria-pressed="true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          class="h-5 w-5 dark:hidden"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+        </svg>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="hidden h-5 w-5 dark:block"
+          aria-hidden="true"
+        >
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<!-- Live chat popup -->
+<div id="live-chat-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div
+    class="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 dark:bg-zinc-900 dark:ring-white/10"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="live-chat-title"
+  >
+    <div class="flex items-center justify-between bg-gradient-to-r from-pink-600 to-rose-500 px-5 py-3.5">
+      <span id="live-chat-title" class="flex items-center gap-2 font-semibold text-white">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
+          <path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.4-.8L3 21l1.9-5.6a8.38 8.38 0 0 1-.9-3.9 8.5 8.5 0 0 1 8.5-8.5 8.38 8.38 0 0 1 8.5 8.5Z" />
+        </svg>
+        Live chat
+      </span>
+      <button
+        id="live-chat-close"
+        type="button"
+        class="rounded-lg p-1.5 text-white/80 transition hover:bg-white/15 hover:text-white"
+        aria-label="Close live chat"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-4 w-4" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </div>
+    <div class="flex flex-col items-center px-6 py-10 text-center">
+      <span class="flex h-14 w-14 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-500/15">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7 text-pink-500" aria-hidden="true">
+          <path d="M12 8v4l2.5 2.5" />
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+      </span>
+      <p class="mt-4 text-lg font-bold text-zinc-900 dark:text-white">Coming soon</p>
+      <p class="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
+        Our live chat is on its way — stay tuned!
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Phone-only search mode (< sm): the search bar takes over the header row. */
+  @media (max-width: 39.99rem) {
+    #site-header[data-search-open] .hdr-collapsible {
+      display: none;
+    }
+    #site-header[data-search-open] .hdr-search {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  /* ── Header behaviour (shared by every page that uses MainLayout) ──────── */
+  const header = document.getElementById('site-header');
+  const searchOpen = document.getElementById('search-open');
+  const searchClose = document.getElementById('search-close');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+  const phone = window.matchMedia('(max-width: 39.99rem)');
+
+  /* Phone search mode */
+  const setSearch = (open: boolean) => {
+    if (!header) return;
+    header.toggleAttribute('data-search-open', open);
+    searchOpen?.setAttribute('aria-expanded', String(open));
+    if (open) {
+      searchInput?.focus({ preventScroll: true });
+    } else if (searchInput && document.activeElement === searchInput) {
+      searchInput.blur();
+      searchOpen?.focus({ preventScroll: true });
+    }
+  };
+  searchOpen?.addEventListener('click', () => setSearch(true));
+  searchClose?.addEventListener('click', () => setSearch(false));
+  searchInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && header?.hasAttribute('data-search-open')) setSearch(false);
+  });
+  // Leaving the phone breakpoint → back to the inline layout.
+  phone.addEventListener('change', (e) => {
+    if (!e.matches) setSearch(false);
+  });
+  // A deep link like /?q=astro on a phone: show the query the user is filtering by.
+  if (phone.matches && searchInput && new URLSearchParams(location.search).get('q')) {
+    header?.toggleAttribute('data-search-open', true);
+    searchOpen?.setAttribute('aria-expanded', 'true');
+  }
+
+  /* Theme toggle */
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle?.addEventListener('click', () => {
+    const dark = document.documentElement.classList.toggle('dark');
+    try {
+      localStorage.setItem('vv-theme', dark ? 'dark' : 'light');
+    } catch {
+      /* private mode */
+    }
+    themeToggle.setAttribute('aria-pressed', String(dark));
+  });
+
+  /* Live chat popup */
+  const chatBtn = document.getElementById('live-chat-btn');
+  const chatModal = document.getElementById('live-chat-modal');
+  const chatClose = document.getElementById('live-chat-close');
+  const setChat = (open: boolean) => {
+    chatModal?.classList.toggle('hidden', !open);
+    chatModal?.classList.toggle('flex', open);
+    if (open) chatClose?.focus({ preventScroll: true });
+    else chatBtn?.focus({ preventScroll: true });
+  };
+  chatBtn?.addEventListener('click', () => setChat(true));
+  chatClose?.addEventListener('click', () => setChat(false));
+  chatModal?.addEventListener('click', (e) => {
+    if (e.target === chatModal) setChat(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && chatModal && !chatModal.classList.contains('hidden')) setChat(false);
+  });
+</script>

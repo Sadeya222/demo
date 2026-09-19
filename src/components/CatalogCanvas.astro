@@ -117,8 +117,12 @@ const pageUrl = (p: number) => (p === 1 ? '/' : `/page/${p}/`);
     const countEl = $('vv-count');
     const chipsEl = $('vv-chips');
     const searchInput = $('search-input');
-    const sidebar = $('sidebar');
     if (!grid || !pag) return;
+
+    /* The sidebar owns its drawer + accordion (see Sidebar.astro); talk to it via events. */
+    const sidebarCmd = (detail) => document.dispatchEvent(new CustomEvent('vv:sidebar', { detail }));
+    const closeDrawer = () => sidebarCmd({ open: false });
+    const openGroupFor = (name) => name && sidebarCmd({ group: name });
 
     const data = JSON.parse($('vv-index').textContent);
     const videos = data.videos;
@@ -307,56 +311,29 @@ const pageUrl = (p: number) => (p === 1 ? '/' : `/page/${p}/`);
       render(scroll);
     };
 
-    /* ── mobile drawer ─────────────────────────────────────────────────── */
-    const backdrop = $('sidebar-backdrop');
-    const openDrawer = (open) => {
-      sidebar?.classList.toggle('-translate-x-full', !open);
-      backdrop?.classList.toggle('hidden', !open);
-    };
-    const closeDrawer = () => {
-      if (window.matchMedia('(max-width: 1023px)').matches) openDrawer(false);
-    };
-    $('menu-btn')?.addEventListener('click', () => openDrawer(true));
-    backdrop?.addEventListener('click', () => openDrawer(false));
-
     /* ── real-time search (debounced 150 ms) ───────────────────────────── */
     let timer;
+    const applySearch = () => {
+      const q = (searchInput?.value || '').trim();
+      if (q === state.q) return;
+      state.q = q;
+      state.page = 1;
+      applyFilters(false);
+    };
     searchInput?.addEventListener('input', () => {
       clearTimeout(timer);
-      timer = setTimeout(() => {
-        const q = (searchInput?.value || '').trim();
-        if (q === state.q) return;
-        state.q = q;
-        state.page = 1;
-        applyFilters(false);
-      }, 150);
+      timer = setTimeout(applySearch, 150);
+    });
+    // Enter / the mobile keyboard's "search" key: results are already live,
+    // so don't reload the page — just apply now and dismiss the keyboard.
+    searchInput?.form?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearTimeout(timer);
+      applySearch();
+      searchInput.blur();
     });
 
-    /* ── sidebar taxonomy tree (accordion + filters) ───────────────────── */
-    const openGroups = new Set();
-    const applyGroupUI = () => {
-      document.querySelectorAll('[data-group]').forEach((g) => {
-        const open = openGroups.has(g.dataset.group);
-        g.classList.toggle('sb-open', open);
-        g.querySelector('[data-toggle]')?.setAttribute('aria-expanded', String(open));
-        g.querySelector('.chev')?.classList.toggle('open', open);
-      });
-    };
-    document.querySelectorAll('[data-toggle]').forEach((b) =>
-      b.addEventListener('click', () => {
-        const n = b.dataset.toggle;
-        if (openGroups.has(n)) openGroups.delete(n);
-        else openGroups.add(n);
-        applyGroupUI();
-      })
-    );
-    const openGroupFor = (name) => {
-      if (name) {
-        openGroups.add(name);
-        applyGroupUI();
-      }
-    };
-
+    /* ── sidebar taxonomy tree → filters ───────────────────────────────── */
     document.querySelectorAll('[data-filter]').forEach((a) =>
       a.addEventListener('click', (e) => {
         e.preventDefault();

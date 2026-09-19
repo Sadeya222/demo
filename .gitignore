@@ -1,0 +1,15 @@
+# build output
+dist/
+# generated types
+.astro/
+# dependencies
+node_modules/
+# logs
+npm-debug.log*
+.DS_Store
+.node_modules
+# Cloudflare / Wrangler local state
+.wrangler/
+.dev.vars
+# Astro telemetry cache (created when HOME points at the repo)
+.config/astro/

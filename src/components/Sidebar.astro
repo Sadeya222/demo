@@ -1,0 +1,193 @@
+---
+import type { CatNode } from '../lib/taxonomy';
+
+interface Props {
+  taxonomy: CatNode[];
+  total: number;
+}
+
+const { taxonomy, total } = Astro.props;
+
+const countCls =
+  'ml-auto rounded-full bg-black/5 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-zinc-500 dark:bg-white/10 dark:text-zinc-400';
+const itemCls =
+  'sb-item flex items-center rounded-lg px-2.5 py-2 text-sm text-zinc-600 hover:bg-black/5 dark:text-zinc-300 dark:hover:bg-white/5';
+---
+
+<!--
+  Category tree.
+    • lg+  : fixed left rail (16rem) — the page content is offset by MainLayout.
+    • < lg : off-canvas drawer (slides in from the left, backdrop, ESC/✕ to
+             close, body scroll locked). Opened by #menu-btn in the header.
+  The behaviour lives in this component so it works on every page —
+  catalog, video detail and 404 alike.
+-->
+<aside
+  id="sidebar"
+  aria-label="Category navigation"
+  class="fixed bottom-0 left-0 top-16 z-40 w-72 max-w-[85vw] -translate-x-full overflow-y-auto overscroll-y-contain border-r border-black/5 bg-white shadow-2xl shadow-black/20 transition-transform duration-200 ease-out dark:border-white/10 dark:bg-zinc-950 lg:w-64 lg:max-w-none lg:translate-x-0 lg:shadow-none"
+>
+  <div class="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div class="flex items-center justify-between px-2.5 pb-2 pt-1">
+      <p class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">Browse</p>
+      <!-- Drawer close (phones/tablets only) -->
+      <button
+        id="sidebar-close"
+        type="button"
+        class="-mr-1.5 rounded-lg p-1.5 text-zinc-500 hover:bg-black/5 dark:text-zinc-400 dark:hover:bg-white/10 lg:hidden"
+        aria-label="Close category navigation"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-4 w-4" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </div>
+
+    <a href="/" data-filter data-cat="" data-sub="" class={`${itemCls} w-full`}>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="mr-2 h-4 w-4 shrink-0 text-pink-500"
+        aria-hidden="true"
+      >
+        <rect x="2" y="4" width="20" height="16" rx="3" />
+        <path d="m10 9 5 3-5 3z" fill="currentColor" stroke="none" />
+      </svg>
+      <span class="sb-label">All Videos</span>
+      <span class={countCls}>{total}</span>
+    </a>
+
+    <div class="mt-1 space-y-0.5">
+      {taxonomy.map((cat) => (
+        <div data-group={cat.name} class="sb-group">
+          <div class="flex items-center">
+            <a
+              href={`/?cat=${encodeURIComponent(cat.name)}`}
+              data-filter
+              data-cat={cat.name}
+              data-sub=""
+              class={`${itemCls} min-w-0 flex-1`}
+            >
+              <span class="sb-label truncate">{cat.name}</span>
+              <span class={countCls}>{cat.count}</span>
+            </a>
+            {cat.subs.length > 0 && (
+              <button
+                data-toggle={cat.name}
+                type="button"
+                class="-mr-1 shrink-0 rounded-md p-1.5 text-zinc-400 hover:bg-black/5 dark:hover:bg-white/10"
+                aria-expanded="false"
+                aria-controls={`sb-children-${cat.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+                aria-label={`Toggle ${cat.name} subcategories`}
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" class="chev h-3.5 w-3.5" aria-hidden="true">
+                  <path
+                    d="M7.29 4.7a.9.9 0 0 1 1.41-.02l5.3 5.3a.9.9 0 0 1 0 1.28l-5.3 5.3a.9.9 0 0 1-1.43-1.26l4.66-4.66-4.66-4.66a.9.9 0 0 1 .02-1.28Z"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <div
+            class="sb-children"
+            id={`sb-children-${cat.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+            data-children={cat.name}
+          >
+            <div>
+              <div class="space-y-0.5 py-0.5 pl-9">
+                {cat.subs.map((sub) => (
+                  <a
+                    href={`/?cat=${encodeURIComponent(cat.name)}&sub=${encodeURIComponent(sub.name)}`}
+                    data-filter
+                    data-cat={cat.name}
+                    data-sub={sub.name}
+                    class={`${itemCls} pl-5 text-[13px]`}
+                  >
+                    <span class="sb-label truncate">{sub.name}</span>
+                    <span class={countCls}>{sub.count}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</aside>
+
+<!-- Drawer backdrop (< lg) -->
+<div id="sidebar-backdrop" class="fixed inset-0 top-16 z-30 hidden bg-black/50 backdrop-blur-sm lg:hidden"></div>
+
+<script>
+  /**
+   * Sidebar behaviour — drawer (mobile/tablet) + accordion (all sizes).
+   *
+   * Other scripts talk to it through one DOM event so they never have to
+   * know about the drawer's markup:
+   *
+   *   document.dispatchEvent(new CustomEvent('vv:sidebar', { detail: { open: false } }));
+   *   document.dispatchEvent(new CustomEvent('vv:sidebar', { detail: { group: 'Tech' } }));
+   */
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const menuBtn = document.getElementById('menu-btn');
+  const closeBtn = document.getElementById('sidebar-close');
+  const desktop = window.matchMedia('(min-width: 64rem)'); // Tailwind `lg`
+
+  /* ── Drawer ─────────────────────────────────────────────────────────── */
+  let open = false;
+  const setDrawer = (next: boolean) => {
+    if (!sidebar) return;
+    open = next && !desktop.matches;
+    sidebar.classList.toggle('-translate-x-full', !open);
+    sidebar.toggleAttribute('data-open', open);
+    backdrop?.classList.toggle('hidden', !open);
+    document.documentElement.classList.toggle('vv-lock', open);
+    menuBtn?.setAttribute('aria-expanded', String(open));
+    if (open) {
+      closeBtn?.focus({ preventScroll: true });
+    } else if (document.activeElement && sidebar.contains(document.activeElement)) {
+      menuBtn?.focus({ preventScroll: true });
+    }
+  };
+
+  menuBtn?.addEventListener('click', () => setDrawer(!open));
+  closeBtn?.addEventListener('click', () => setDrawer(false));
+  backdrop?.addEventListener('click', () => setDrawer(false));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && open) setDrawer(false);
+  });
+  // Rotating / resizing across the lg breakpoint: never leave a stale
+  // backdrop or scroll lock behind.
+  desktop.addEventListener('change', () => setDrawer(false));
+  // bfcache restore (back button) — reset to a known state.
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) setDrawer(false);
+  });
+
+  /* ── Accordion (category → subcategories) ───────────────────────────── */
+  const setGroup = (name: string, next?: boolean) => {
+    const group = sidebar?.querySelector<HTMLElement>(`[data-group="${CSS.escape(name)}"]`);
+    if (!group) return;
+    const willOpen = next ?? !group.classList.contains('sb-open');
+    group.classList.toggle('sb-open', willOpen);
+    group.querySelector('[data-toggle]')?.setAttribute('aria-expanded', String(willOpen));
+    group.querySelector('.chev')?.classList.toggle('open', willOpen);
+  };
+  sidebar?.querySelectorAll<HTMLElement>('[data-toggle]').forEach((b) =>
+    b.addEventListener('click', () => setGroup(b.dataset.toggle || ''))
+  );
+
+  /* ── Public event API ───────────────────────────────────────────────── */
+  document.addEventListener('vv:sidebar', (e) => {
+    const d = (e as CustomEvent<{ open?: boolean; group?: string }>).detail || {};
+    if (typeof d.open === 'boolean') setDrawer(d.open);
+    if (d.group) setGroup(d.group, true);
+  });
+</script>

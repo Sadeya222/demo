@@ -1,0 +1,35 @@
+{
+  // ───────────────────────────────────────────────────────────────────────────
+  // Cloudflare deployment config (Workers static assets).
+  //
+  // The site is 100 % pre-rendered by `astro build` into ./dist — no server
+  // code, no adapter. Cloudflare just uploads that folder and serves it from
+  // the edge. This one file works for every Cloudflare path:
+  //
+  //   • Workers  (Git integration / "Import a repository")
+  //       build:  npm run build      deploy: npx wrangler deploy
+  //   • Workers  (CLI)               npm run deploy
+  //   • Pages    (Git integration)   build: npm run build · output dir: dist
+  //   • Pages    (CLI)               npm run deploy:pages
+  //
+  // Pages ignores this file (it only reads `pages_build_output_dir`), so the
+  // Pages settings above are all it needs.
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // Worker name → https://desidude.<your-subdomain>.workers.dev
+  "name": "desidude",
+
+  // Keep at or below today's date.
+  "compatibility_date": "2026-09-01",
+
+  "assets": {
+    // Folder produced by `astro build`.
+    "directory": "./dist",
+    // Serve dist/404.html with a real 404 status for unknown routes
+    // (never fall back to index.html — that would create soft-404s).
+    "not_found_handling": "404-page",
+    // /video/x → 308 → /video/x/  (matches Astro's `directory` build format
+    // and the trailing-slash canonical URLs rendered into every page).
+    "html_handling": "auto-trailing-slash"
+  }
+}

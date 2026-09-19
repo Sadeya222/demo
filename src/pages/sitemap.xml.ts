@@ -31,9 +31,11 @@ export async function GET() {
     `    <priority>${priority}</priority>\n` +
     `  </url>`;
 
+  // Trailing slashes match the canonical URLs rendered into every page and
+  // the directory-style URLs Cloudflare serves (/video/x → 308 → /video/x/).
   const entries = [
     url(`${SITE_URL}/`, now, 'daily', '1.0'),
-    ...videos.map((v) => url(`${SITE_URL}/video/${v.id}`, v.data.publishedAt, 'monthly', '0.8')),
+    ...videos.map((v) => url(`${SITE_URL}/video/${v.id}/`, v.data.publishedAt, 'monthly', '0.8')),
   ];
 
   const xml =

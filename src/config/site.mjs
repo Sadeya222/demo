@@ -3,19 +3,30 @@
 //
 // SITE_URL resolution order (used by /sitemap.xml, /robots.txt, canonical and
 // VideoObject schema URLs):
-//   1. SITE_URL env var          → pin an exact domain (e.g. a custom domain)
-//   2. URL env var               → set automatically by Cloudflare Pages on
-//                                  every build (auto-updates per deployment)
-//   3. default                   → the Cloudflare Pages project origin
+//   1. SITE_URL env var  → the live origin. Set it in Cloudflare →
+//                          your project → Settings → Variables (build-time),
+//                          e.g. https://desidude.pages.dev,
+//                               https://desidude.<you>.workers.dev or
+//                               https://yourdomain.com
+//   2. URL env var       → set automatically by Netlify builds
+//   3. DEFAULT_SITE_URL  → fallback below; change it once you know your domain
+//
+// Note: Cloudflare only exposes per-deployment preview origins
+// (CF_PAGES_URL / hashed *.pages.dev), which must never become the canonical
+// URL — that's why the production origin is pinned explicitly.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SITE_NAME = 'DESIDUDE';
 export const SITE_TAGLINE = 'Hot video streaming, zero database';
 
+/** Fallback production origin when no SITE_URL env var is provided. */
+const DEFAULT_SITE_URL = 'https://desidude.pages.dev';
+
 /** Absolute origin (no trailing slash) of the deployed site. */
-export const SITE_URL = String(
-  process.env.SITE_URL || process.env.URL || 'https://desidude.pages.dev'
-).replace(/\/+$/, '');
+export const SITE_URL = String(process.env.SITE_URL || process.env.URL || DEFAULT_SITE_URL).replace(
+  /\/+$/,
+  ''
+);
 
 /** Videos per page in the main catalog grid. */
 export const PER_PAGE = 9;
